@@ -1,18 +1,40 @@
-﻿@page "/counter"
+﻿@* Interactive blazor component; Buttons can be clicked *@
+
+@page "/counter"
 
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 
+@* currentCount value will be placed by server *@
 <p role="status">Current count: @currentCount</p>
 
+@*
+	- IncrementCount will be executed by the server when button is
+	  clicked and currentCount value will be updated.
+	- The component will be re-rendered.
+*@
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-@code {
-    private int currentCount = 0;
+<button class="btn btn-primary" @onclick="ClearCount">Clear</button>
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+<ul>
+	@for (int i = 0; i < currentCount; i++)
+	{
+		<li>Item @i</li>
+	}
+</ul>
+
+@code {
+	private int currentCount = 2;
+
+	private void IncrementCount()
+	{
+		currentCount += 1;
+	}
+
+	private void ClearCount()
+	{
+		currentCount = 0;
+	}
 }
