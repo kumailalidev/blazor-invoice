@@ -16,8 +16,9 @@ public class Program
         // Add services to the container.
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString));
+        // DbContext
+        builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+            options.UseSqlite(connectionString), lifetime: ServiceLifetime.Transient);
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

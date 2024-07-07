@@ -1,5 +1,7 @@
 ﻿@page "/"
 
+@inject IDbContextFactory<ApplicationDbContext> dbFactory
+
 @* Page title; appear in browser tab *@
 <PageTitle>Home</PageTitle>
 
@@ -8,3 +10,28 @@
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" Message="Hopefully you will enjoy this." />
+
+@if (customers is null)
+{
+	<p>Loading customers...</p>
+}
+else
+{
+	@foreach (var customer in customers)
+	{
+		<p>@customer.Name</p>
+	}
+}
+
+@code {
+	private List<Customer> customers = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		// Creating database context
+		var context = dbFactory.CreateDbContext();
+
+		// Accessing context to read the data
+		customers = await context.Customers.ToListAsync();
+	}
+}
