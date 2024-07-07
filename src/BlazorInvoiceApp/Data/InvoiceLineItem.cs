@@ -11,7 +11,7 @@ namespace BlazorInvoiceApp.Data
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         public string InvoiceId { get; set; } = String.Empty;
-        public Invoice? Invoice { get; set; } = null; // Navigation property
+        public Invoice? Invoice { get; set; } = null!; // Navigation property
 
         public string Description { get; set; } = String.Empty;
         public double UnitPrice { get; set; }
@@ -19,6 +19,6 @@ namespace BlazorInvoiceApp.Data
         public double TotalPrice { get; private set; }
 
         public string UserId { get; set; } = null!;
-        public IdentityUser? User { get; set; } = null; // Navigation property
+        public IdentityUser? User { get; set; } = null!; // Navigation property
     }
 }

@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BlazorInvoiceApp.Data.Migrations
+namespace BlazorInvoiceApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240707163547_db1")]
-    partial class db1
+    [Migration("20240707183427_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,9 +58,9 @@ namespace BlazorInvoiceApp.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("InvoiceNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("InvoiceTermsId")
                         .IsRequired()
@@ -69,7 +69,7 @@ namespace BlazorInvoiceApp.Data.Migrations
                     b.Property<double>("Paid")
                         .HasColumnType("REAL");
 
-                    b.Property<double>("TaxRated")
+                    b.Property<double>("TaxRate")
                         .HasColumnType("REAL");
 
                     b.Property<string>("UserId")

@@ -1,0 +1,253 @@
+﻿@page "/entity-test"
+
+@using System.Security.Claims
+@inject AuthenticationStateProvider authState
+@inject IDbContextFactory<ApplicationDbContext> dbFactory
+
+<h3>Entity Framework Test</h3>
+
+@* Invoices *@
+@if (invoices != null)
+{
+	<ul>
+		@foreach (var invoice in invoices)
+		{
+			<li>
+				<ul>
+					<li>Id: @invoice.Id</li>
+					<li>Invoice Number: @invoice.InvoiceNumber</li>
+					<li>Customer Id: @invoice.CustomerId</li>
+					<li>Customer Name: @invoice.Customer?.Name</li>
+					<li>Invoice Terms Id: @invoice.InvoiceTermsId</li>
+					<li>Invoice Terms Name: @invoice.InvoiceTerms?.Name</li>
+					<li>Paid Amount: @invoice.Paid</li>
+					<li>Credit: @invoice.Credit</li>
+					<li>Tax Rate: @invoice.TaxRate</li>
+					@foreach (var item in invoice.InvoiceLineItems)
+					{
+						<li>
+							Line Item:
+							<ul>
+								<li>Id: @item.Id</li>
+								<li>Description: @item.Description</li>
+								<li>Unit Price: @item.UnitPrice</li>
+								<li>Quantity: @item.Quantity</li>
+								<li>Total Price: @item.TotalPrice</li>
+							</ul>
+						</li>
+					}
+				</ul>
+			</li>
+			<hr />
+		}
+	</ul>
+}
+
+@code {
+	private List<Invoice>? invoices = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		// Checking who is logged in
+		AuthenticationState authenticationState = await authState.GetAuthenticationStateAsync();
+		Claim? uid = authenticationState.User?.FindFirst(
+			type: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+		if (uid is not null)
+		{
+			// Creating database context
+			var context = await dbFactory.CreateDbContextAsync();
+
+			// Getting user id
+			string userId = uid.Value;
+
+			// Clearing out the tables
+
+			// Deleting all the customers
+			var customersToDelete = await context.Customers.Where(c =>
+				c.UserId == userId).ToListAsync();
+			foreach (var customer in customersToDelete)
+			{
+				context.Customers.Remove(customer);
+			}
+
+			// Deleting all the invoice terms
+			var invoiceTermsToDelete = await context.InvoiceTerms.Where(it =>
+				it.UserId == userId).ToListAsync();
+			foreach (var invoiceTerm in invoiceTermsToDelete)
+			{
+				context.InvoiceTerms.Remove(invoiceTerm);
+			}
+
+			// Deleting all the invoice line items
+			var invoiceLineItemsToDelete = await context.InvoiceLineItems.Where(ili =>
+				ili.UserId == userId).ToListAsync();
+			foreach (var invoiceLineItem in invoiceLineItemsToDelete)
+			{
+				context.InvoiceLineItems.Remove(invoiceLineItem);
+			}
+
+			// Deleting all the invoices
+			var invoicesToDelete = await context.Invoices.Where(i =>
+				i.UserId == userId).ToListAsync();
+			foreach (var invoice in invoicesToDelete)
+			{
+				context.Invoices.Remove(invoice);
+			}
+
+			// Creating a new customers
+			Customer c1 = new Customer()
+				{
+					UserId = userId,
+					Name = "Customer 1"
+				};
+			Customer c2 = new Customer()
+				{
+					UserId = userId,
+					Name = "Customer 2"
+				};
+			Customer c3 = new Customer()
+				{
+					UserId = userId,
+					Name = "Customer 3"
+				};
+
+			// Adding customers to the database context
+			context.Customers.Add(entity: c1);
+			context.Customers.Add(entity: c2);
+			context.Customers.Add(entity: c3);
+
+			// Creating invoice terms and adding to the database context
+			InvoiceTerms terms1 = new InvoiceTerms()
+				{
+					UserId = userId,
+					Name = "Net 45"
+				};
+			context.InvoiceTerms.Add(entity: terms1);
+
+			// Creating new invoices
+			Invoice invoice1 = new Invoice()
+				{
+					InvoiceTermsId = terms1.Id,
+					UserId = userId,
+					Credit = 0.0,
+					CustomerId = c1.Id,
+					Paid = 0.0,
+					Description = "First Invoice",
+					TaxRate = 5.0
+				};
+			Invoice invoice2 = new Invoice()
+				{
+					InvoiceTermsId = terms1.Id,
+					UserId = userId,
+					Credit = 0.0,
+					CustomerId = c2.Id,
+					Paid = 0.0,
+					Description = "First Invoice",
+					TaxRate = 5.0
+				};
+			Invoice invoice3 = new Invoice()
+				{
+					InvoiceTermsId = terms1.Id,
+					UserId = userId,
+					Credit = 0.0,
+					CustomerId = c2.Id,
+					Paid = 0.0,
+					Description = "Third Invoice",
+					TaxRate = 5.0
+				};
+
+			// Adding invoices to the database
+			context.Invoices.Add(entity: invoice1);
+			context.Invoices.Add(entity: invoice2);
+			context.Invoices.Add(entity: invoice3);
+
+			// Adding line items to the invoices
+			InvoiceLineItem invoiceLineItem1 = new InvoiceLineItem()
+				{
+					InvoiceId = invoice1.Id,
+					UserId = userId,
+					Quantity = 4,
+					Description = "Computers",
+					UnitPrice = 555
+				};
+			InvoiceLineItem invoiceLineItem2 = new InvoiceLineItem()
+				{
+					InvoiceId = invoice1.Id,
+					UserId = userId,
+					Quantity = 2,
+					Description = "Printers",
+					UnitPrice = 250
+				};
+			InvoiceLineItem invoiceLineItem3 = new InvoiceLineItem()
+				{
+					InvoiceId = invoice2.Id,
+					UserId = userId,
+					Quantity = 12,
+					Description = "Apples",
+					UnitPrice = 0.79
+				};
+			InvoiceLineItem invoiceLineItem4 = new InvoiceLineItem()
+				{
+					InvoiceId = invoice2.Id,
+					UserId = userId,
+					Quantity = 5,
+					Description = "Oranges",
+					UnitPrice = 1.25
+				};
+			InvoiceLineItem invoiceLineItem5 = new InvoiceLineItem()
+				{
+					InvoiceId = invoice3.Id,
+					UserId = userId,
+					Quantity = 20,
+					Description = "Stapler",
+					UnitPrice = 12.95
+				};
+
+			// Adding line items to database
+			context.InvoiceLineItems.Add(entity: invoiceLineItem1);
+			context.InvoiceLineItems.Add(entity: invoiceLineItem2);
+			context.InvoiceLineItems.Add(entity: invoiceLineItem3);
+			context.InvoiceLineItems.Add(entity: invoiceLineItem4);
+			context.InvoiceLineItems.Add(entity: invoiceLineItem5);
+
+			// Saving changes to the database
+			await context.SaveChangesAsync();
+
+			// Task: Change all of invoices for customer 2, adjust the tax rate
+
+			// Getting all the invoices for customer 2 (NOTE: Could match more than one customer)
+			List<Invoice> customerInvoices = await context.Invoices.Where(predicate: i =>
+				i.CustomerId == c2.Id).ToListAsync();
+
+			// Making change to tax rate
+			foreach (Invoice i in customerInvoices)
+			{
+				i.TaxRate = 10;
+			}
+
+			// Saving changes
+			await context.SaveChangesAsync();
+
+			// Getting customer : Returns customer or null if there is no result
+			Customer? customerToChange = await context.Customers.Where(predicate: c =>
+				c.Name == "Customer 2").FirstOrDefaultAsync();
+
+			// Changing name of the customer
+			if (customerToChange is not null)
+			{
+				customerToChange.Name = "Test Customer 2";
+				await context.SaveChangesAsync(); // Saving changes
+			}
+
+			// Getting all the invoices for customer 2, also includes all the navigation
+			// property values using SQL joins
+			invoices = await context.Invoices
+			.Where(predicate: i => i.CustomerId == c2.Id)
+				.Include(navigationPropertyPath: "Customer")
+				.Include(navigationPropertyPath: "InvoiceTerms")
+				.Include(navigationPropertyPath: "InvoiceLineItems")
+				.ToListAsync();
+		}
+	}
+}

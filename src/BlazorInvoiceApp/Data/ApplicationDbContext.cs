@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace BlazorInvoiceApp.Data;
 
@@ -33,8 +32,9 @@ public class ApplicationDbContext : IdentityDbContext
         RemoveFixups(modelBuilder: builder, type: typeof(InvoiceTerms));
         RemoveFixups(modelBuilder: builder, type: typeof(InvoiceLineItem));
 
-        builder.Entity<Invoice>().Property(u => u.InvoiceNumber).Metadata
-               .SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+        // NOTE: Will not work with file based databases such as SQLite
+        //builder.Entity<Invoice>().Property(u => u.InvoiceNumber).Metadata
+        //       .SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
         // Telling EF not to create a column 'Total Price' in Db,
         // make it as a computed column
