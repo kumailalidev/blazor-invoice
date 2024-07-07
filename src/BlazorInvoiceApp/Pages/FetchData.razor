@@ -3,6 +3,8 @@
 <PageTitle>Weather forecast</PageTitle>
 
 @using BlazorInvoiceApp.Data
+
+@* Creating instance of WeatherForecastService service *@
 @inject WeatherForecastService ForecastService
 
 <h1>Weather forecast</h1>
@@ -39,10 +41,13 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+	private WeatherForecast[]? forecasts;
 
-    protected override async Task OnInitializedAsync()
-    {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+	protected override async Task OnInitializedAsync()
+	{
+		// Introducing artificial delay
+		await Task.Delay(millisecondsDelay: 2000);
+
+		forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
     }
 }
