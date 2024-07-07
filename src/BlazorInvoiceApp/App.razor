@@ -1,9 +1,11 @@
 ﻿<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly">
+    @* Blazor router *@
+	<Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
+		@* If page '/foo' not found *@
         <NotFound>
             <PageTitle>Not found</PageTitle>
             <LayoutView Layout="@typeof(MainLayout)">
@@ -11,4 +13,5 @@
             </LayoutView>
         </NotFound>
     </Router>
+	@* *@
 </CascadingAuthenticationState>
