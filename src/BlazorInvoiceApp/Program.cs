@@ -1,5 +1,8 @@
+using AutoMapper;
+
 using BlazorInvoiceApp.Areas.Identity;
 using BlazorInvoiceApp.Data;
+using BlazorInvoiceApp.Repository;
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +33,15 @@ public class Program
         builder.Services.AddServerSideBlazor();
 
         builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+
+        // AutoMapper
+        var mapperConfig = new MapperConfiguration(mc =>
+        {
+            mc.AddProfile(new AutoMapperProfile());
+        });
+
+        IMapper mapper = mapperConfig.CreateMapper();
+        builder.Services.AddSingleton(mapper);
 
         builder.Services.AddSingleton<WeatherForecastService>();
 
