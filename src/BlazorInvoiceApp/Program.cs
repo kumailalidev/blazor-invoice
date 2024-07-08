@@ -18,7 +18,7 @@ public class Program
 
         // DbContext
         builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString), lifetime: ServiceLifetime.Transient);
+            options.UseSqlServer(connectionString), lifetime: ServiceLifetime.Transient);
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

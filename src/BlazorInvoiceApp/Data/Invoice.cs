@@ -15,11 +15,11 @@ namespace BlazorInvoiceApp.Data
 
         // NOTE: Will not work with file based databases such as SQLite
         // Letting database to generate invoice numbers
-        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        //public int InvoiceNumber { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int InvoiceNumber { get; set; }
 
         // For file based databases only
-        public string InvoiceNumber { get; set; } = Guid.NewGuid().ToString();
+        // public string InvoiceNumber { get; set; } = Guid.NewGuid().ToString();
 
         public DateTime CreateDate { get; set; } = DateTime.Now;
 
