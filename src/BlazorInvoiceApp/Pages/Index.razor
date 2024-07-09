@@ -1,6 +1,7 @@
 ﻿@page "/"
 
-@inject IDbContextFactory<ApplicationDbContext> dbFactory
+@inject IRepositoryCollection repo
+@inject AuthenticationStateProvider authState
 
 @* Page title; appear in browser tab *@
 <PageTitle>Home</PageTitle>
@@ -17,21 +18,21 @@ Welcome to your new app.
 }
 else
 {
-	@foreach (var customer in customers)
+	@foreach (CustomerDTO customer in customers)
 	{
 		<p>@customer.Name</p>
 	}
 }
 
 @code {
-	private List<Customer> customers = null;
+	private List<CustomerDTO> customers = null!;
 
 	protected override async Task OnInitializedAsync()
 	{
-		// Creating database context
-		var context = dbFactory.CreateDbContext();
+		// Checking who is logged in
+		AuthenticationState auth = await authState.GetAuthenticationStateAsync();
 
 		// Accessing context to read the data
-		customers = await context.Customers.ToListAsync();
+		customers = await repo.Customer.GetAllMine(User: auth.User);
 	}
 }
