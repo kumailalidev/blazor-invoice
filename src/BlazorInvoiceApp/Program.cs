@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using Radzen;
+
 namespace BlazorInvoiceApp;
 
 public class Program
@@ -33,6 +35,8 @@ public class Program
         builder.Services.AddServerSideBlazor();
 
         builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+
+        builder.Services.AddScoped<DialogService>();
 
         builder.Services.AddTransient<IRepositoryCollection, RepositoryCollection>();
 

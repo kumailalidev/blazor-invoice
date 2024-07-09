@@ -1,38 +1,18 @@
 ﻿@page "/"
 
-@inject IRepositoryCollection repo
-@inject AuthenticationStateProvider authState
-
 @* Page title; appear in browser tab *@
-<PageTitle>Home</PageTitle>
+<PageTitle>Invoices</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Invoices</h1>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" Message="Hopefully you will enjoy this." />
-
-@if (customers is null)
-{
-	<p>Loading customers...</p>
-}
-else
-{
-	@foreach (CustomerDTO customer in customers)
-	{
-		<p>@customer.Name</p>
-	}
-}
+<AuthorizeView>
+	<Authorized>
+		<InvoicesComponent />
+	</Authorized>
+	<NotAuthorized>
+		Please Login to see your invoices.
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
-	private List<CustomerDTO> customers = null!;
-
-	protected override async Task OnInitializedAsync()
-	{
-		// Checking who is logged in
-		AuthenticationState auth = await authState.GetAuthenticationStateAsync();
-
-		// Accessing context to read the data
-		customers = await repo.Customer.GetAllMine(User: auth.User);
-	}
 }
