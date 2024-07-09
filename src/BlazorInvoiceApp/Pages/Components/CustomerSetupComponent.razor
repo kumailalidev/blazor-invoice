@@ -1,0 +1,176 @@
+﻿@inject IRepositoryCollection repository
+@inject AuthenticationStateProvider authenticationStateProvider
+
+<h3>Customers</h3>
+
+@* Message(s) *@
+<div class="text-danger">
+	@Message
+</div>
+
+@* Add customer button *@
+<RadzenButton ButtonStyle="ButtonStyle.Success"
+			  Icon="add_circle_outline"
+			  class="mt-2 mb-4"
+			  Text="Add New Customer"
+			  Click="@InsertRow"
+			  Disabled="@(customerToInsert != null || customerToUpdate != null)" />
+
+<RadzenDataGrid @ref="customersGrid"
+				AllowAlternatingRows="false"
+				AllowSorting="true"
+				EditMode="DataGridEditMode.Single"
+				Data="@customers"
+				TItem="CustomerDTO"
+				RowUpdate="@OnUpdateRow"
+				RowCreate="@OnCreateRow"
+				Sort="@Reset">
+	@* Columns *@
+	<Columns>
+		@* Id *@
+		@* <RadzenDataGridColumn TItem="CustomerDTO" Property="Id" Title="Id" Width="200px"></RadzenDataGridColumn> *@
+
+		@* Name *@
+		<RadzenDataGridColumn TItem="CustomerDTO" Property="Name" Title="Name" Width="200px">
+			@*Editing template*@
+			<EditTemplate Context="customer">
+				<RadzenTextBox @bind-Value="customer.Name" Style="width:100%; display:block;" Name="Name" />
+				<RadzenRequiredValidator Text="Name is required" Component="Name" Popup="true" />
+			</EditTemplate>
+		</RadzenDataGridColumn>
+
+		@* Actions *@
+		<RadzenDataGridColumn TItem="CustomerDTO" Context="customer" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="150px">
+			@* Templating for not being edited *@
+			<Template Context="customer">
+				@* Edit *@
+				<RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(customer))" @onclick:stopPropagation="true">
+				</RadzenButton>
+				@* Delete *@
+				<RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(customer))" @onclick:stopPropagation="true">
+				</RadzenButton>
+			</Template>
+			@* Templating for being edited *@
+			<EditTemplate Context="customer">
+				@* Check the changes and confirm *@
+				<RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(customer))">
+				</RadzenButton>
+				@* Cancel the changes *@
+				<RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(customer))">
+				</RadzenButton>
+				@* Delete *@
+				<RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(customer))">
+				</RadzenButton>
+			</EditTemplate>
+		</RadzenDataGridColumn>
+	</Columns>
+</RadzenDataGrid>
+
+@code {
+	List<CustomerDTO> customers = new();
+	RadzenDataGrid<CustomerDTO>? customersGrid;
+
+	string Message = string.Empty;
+
+	// Tracking variables
+	CustomerDTO? customerToInsert;
+	CustomerDTO? customerToUpdate;
+
+	protected override async Task OnInitializedAsync()
+	{
+		AuthenticationState authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+		await repository.Customer.Seed(authenticationState.User);
+		await repository.Save();
+
+		customers = await repository.Customer.GetAllMine(authenticationState.User);
+	}
+
+	async Task EditRow(CustomerDTO customer)
+	{
+		// Handling editing of a row
+		Message = "";
+		customerToUpdate = customer;
+		await customersGrid!.EditRow(customer);
+	}
+
+	async Task OnUpdateRow(CustomerDTO customer)
+	{
+		AuthenticationState authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+		Reset();
+		await repository.Customer.UpdateMine(authenticationState.User, customer);
+		await repository.Save();
+	}
+
+	async Task SaveRow(CustomerDTO customer)
+	{
+		Message = "";
+		await customersGrid!.UpdateRow(customer);
+	}
+
+	void CancelEdit(CustomerDTO customer)
+	{
+		Reset();
+		customersGrid!.CancelEditRow(customer);
+	}
+
+	async Task DeleteRow(CustomerDTO customer)
+	{
+		AuthenticationState authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+		Reset();
+
+		try
+		{
+			bool found = await repository.Customer.DeleteMine(authenticationState.User, customer.Id);
+
+			if (found)
+			{
+				await repository.Save();
+
+				// If nothing in the database seed it
+				await repository.Customer.Seed(authenticationState.User);
+				await repository.Save();
+
+				// Reload all the customers objects
+				this.customers = await repository.Customer.GetAllMine(authenticationState.User);
+				await customersGrid!.Reload();
+			}
+			else
+			{
+				customersGrid!.CancelEditRow(customer);
+				await customersGrid!.Reload();
+			}
+		}
+		catch (RepositoryDeleteException)
+		{
+
+			// Can not delete because would break integrity
+			Message = "Can't delete selected customer, it is being used by an invoice";
+		}
+	}
+
+	async Task InsertRow()
+	{
+		Message = "";
+		customerToInsert = new CustomerDTO();
+		await customersGrid!.InsertRow(customerToInsert);
+	}
+
+	async Task OnCreateRow(CustomerDTO customer)
+	{
+		AuthenticationState authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+		customer.Id = await repository.Customer.AddMine(authenticationState.User, customer);
+		await repository.Save();
+
+		this.customers = await repository.Customer.GetAllMine(authenticationState.User);
+		customerToInsert = null;
+	}
+
+	void Reset()
+	{
+		Message = "";
+		customerToInsert = null;
+		customerToUpdate = null;
+	}
+}

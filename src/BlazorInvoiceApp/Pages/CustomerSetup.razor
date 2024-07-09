@@ -1,6 +1,16 @@
-﻿@page "/customer-setup"
+﻿@page "/customers-setup"
 
-<h3>Customer Setup</h3>
+<PageTitle>Customers Setup</PageTitle>
+
+@* Only for authenticated users *@
+<AuthorizeView>
+	<Authorized>
+		<CustomerSetupComponent />
+	</Authorized>
+	<NotAuthorized>
+		Please login in to see your customers
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
 

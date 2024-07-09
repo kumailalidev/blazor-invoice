@@ -2,6 +2,16 @@
 
 <h3>Invoice Terms Setup</h3>
 
+@* Only for authenticated users *@
+<AuthorizeView>
+	<Authorized>
+		<InvoiceTermsSetupComponent />
+	</Authorized>
+	<NotAuthorized>
+		Please login in to see your invoices
+	</NotAuthorized>
+</AuthorizeView>
+
 @code {
 
 }
