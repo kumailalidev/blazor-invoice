@@ -3,7 +3,7 @@ using BlazorInvoiceApp.DTOs;
 
 namespace BlazorInvoiceApp.Repository
 {
-    public interface IInvoiceLineItemsRepository :
+    public interface IInvoiceLineItemRepository :
         IGenericOwnedRepository<InvoiceLineItem, InvoiceLineItemDTO>
     {
     }

@@ -5,11 +5,11 @@ using BlazorInvoiceApp.DTOs;
 
 namespace BlazorInvoiceApp.Repository
 {
-    public class InvoiceLineItemsRepository :
+    public class InvoiceLineItemRepository :
         GenericOwnedRepository<InvoiceLineItem, InvoiceLineItemDTO>,
-        IInvoiceLineItemsRepository
+        IInvoiceLineItemRepository
     {
-        public InvoiceLineItemsRepository(ApplicationDbContext context, IMapper mapper) :
+        public InvoiceLineItemRepository(ApplicationDbContext context, IMapper mapper) :
             base(context, mapper)
         {
         }

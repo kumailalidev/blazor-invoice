@@ -34,6 +34,8 @@ public class Program
 
         builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 
+        builder.Services.AddTransient<IRepositoryCollection, RepositoryCollection>();
+
         // AutoMapper
         var mapperConfig = new MapperConfiguration(mc =>
         {
