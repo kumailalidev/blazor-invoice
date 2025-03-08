@@ -9,7 +9,7 @@
 
 ### 1. Install .NET 6.0 SDK
 
-### 2. Update Connection String inside `appsettings.development.json` file
+### 2. Update Connection String Inside `appsettings.development.json` File
 
 #### SQL Server :-
 
